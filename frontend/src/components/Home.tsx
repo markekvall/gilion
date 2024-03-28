@@ -32,13 +32,21 @@ const Home: React.FC = () => {
     };
 
     const testFetchData = async () => {
+        const username = 'stanleyjobson';
+        const password = 'swordfish';
+    
+        const headers = {
+            Authorization: `Basic ${btoa(`${username}:${password}`)}`
+        };
 
-        console.log('hellolog');
-        //setData([{ response: 'hello' }]);
-        const response = await axios.get('http://localhost:8000');
-        const message = response.data.message; // Update to access 'message' directly
-        console.log('Response received:', response.data);
-        setData([{ response: message }]);
+
+        try {
+            const response = await axios.get('http://localhost:8000', { headers });
+            const message = response.data.message;
+            setData([{ response: message }]);
+        } catch (error) {
+            console.error('Error:', error);
+        }
         
     };
 

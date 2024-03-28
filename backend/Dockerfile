@@ -5,6 +5,9 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 RUN pip install poetry
 COPY pyproject.toml poetry.lock* /app/
+COPY application /app/application
+COPY database /app/database
+COPY models /app/models
 RUN poetry config virtualenvs.create false \
   && poetry install --no-interaction --no-ansi
 COPY main.py .
