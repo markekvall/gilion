@@ -8,6 +8,8 @@ COPY pyproject.toml poetry.lock* /app/
 COPY application /app/application
 COPY database /app/database
 COPY models /app/models
+COPY daily.csv /app
+COPY monthly.csv /app
 RUN poetry config virtualenvs.create false \
   && poetry install --no-interaction --no-ansi
 COPY main.py .

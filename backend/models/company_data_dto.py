@@ -1,13 +1,20 @@
-from pydantic import BaseModel, Field, Field
-from datetime import datetime
-from typing import Optional
-from uuid import uuid4
 import pandas as pd
+import json
+from database.company_data_db_model import CompanyDataDBModel
 
 
-class CompanyDataDTO(BaseModel):
-    id: Optional[str] = Field(default_factory=lambda: str(uuid4()), description="Receipt id")
-    created_at: Optional[datetime] = Field(default_factory=lambda: datetime.now(), description="datetime of digital receipt creation")
-    company_name: Optional[str] = Field(description="Name of company which data is extracted from", default=None)
-    daily_data: Optional[pd.DataFrame] = Field(description="Data diplaying values A, B and C in daily form", default=None)
-    monthly_data: Optional[pd.DataFrame] = Field(description="Data diplaying values A, B and C in monthly form", default=None)
+class CompanyDataDTO:
+    def __init__(self, company_name: str = None, daily_data: pd.DataFrame = None, monthly_data: pd.DataFrame = None):
+        self.company_name = company_name
+        self.daily_data = daily_data
+        self.monthly_data = monthly_data
+
+    @classmethod
+    def from_db_model(cls, db_model: CompanyDataDBModel):
+        daily_data = pd.DataFrame.from_dict(json.loads(db_model.daily_data))
+        monthly_data = pd.DataFrame.from_dict(json.loads(db_model.monthly_data))
+        return cls(
+            company_name=db_model.company_name,
+            daily_data=daily_data,
+            monthly_data=monthly_data
+        )

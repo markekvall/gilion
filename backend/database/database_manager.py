@@ -1,7 +1,7 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from database.company_data_db_model import Base, CompanyDataDBModel
-from models.simple_company_data_dto import SimpleCompanyDataDTO
+from models.company_data_dto import CompanyDataDTO
 
 class DatabaseManager:
 
@@ -11,7 +11,7 @@ class DatabaseManager:
         self.Session = sessionmaker(bind=self.engine)
 
 
-    def create(self, company_data_dto: SimpleCompanyDataDTO):
+    def create(self, company_data_dto: CompanyDataDTO):
         try:
             company_data = CompanyDataDBModel.from_dto(company_data_dto)
 
@@ -25,11 +25,11 @@ class DatabaseManager:
                 print(f"Error adding company data in database: {e}")
 
 
-    def read_data_by_company_name(self, company_name: str) -> SimpleCompanyDataDTO:
+    def read_data_by_company_name(self, company_name: str) -> CompanyDataDTO:
         try:
             with self.Session() as session:
                 company_db_model: CompanyDataDBModel = session.query(CompanyDataDBModel).filter(CompanyDataDBModel.company_name == company_name).first()
-                return SimpleCompanyDataDTO.from_db_model(company_db_model)
+                return CompanyDataDTO.from_db_model(company_db_model)
         except SQLAlchemyError as e:
             print(f"Error retrieving data by company: {company_name}, error: {e}")
 
