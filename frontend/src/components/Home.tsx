@@ -3,52 +3,77 @@ import axios from "axios";
 import { Grid, Paper, Typography } from '@mui/material';
 import Box from "@mui/material/Box"
 import { Scrollbar } from 'react-scrollbars-custom';
-
 import Button from "@mui/material/Button"
 
+
 interface Data {
-    response: string;
+    date: string;
+    country_code: string;
+    A: number;
+    B: number;
+    C: number;
 }
+
 
 const Home: React.FC = () => {
     const [data, setData] = useState<Data[]>([]);
-    const [error, setError] = useState<string | null>(null);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [countryCode, setCountryCode] = useState('');
+    const [fetchType, setFetchType] = useState('daily'); 
+    const username = 'Alice';
+    const password = 'My Very Secret Password';
+    ///const url = `http://localhost:8000/fetch-${fetchType}?start_date=${startDate}&end_date=${endDate}&country_code=${countryCode}`;
 
-    const fetchData = async () => {
 
-        console.log('hello');
-        try {
-            console.log('Fetching data...');
-    
-            const response = await axios.get('http://localhost:8000');
-            const message = response.data.message; // Update to access 'message' directly
-            console.log('Response received:', response.data);
-            setData([{ response: message }]);
-            setError(null); // Reset error if previous request was successful
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            setError('Failed to fetch data');
-        }
-    };
 
-    const testFetchData = async () => {
-        const username = 'stanleyjobson';
-        const password = 'swordfish';
-    
-        const headers = {
-            Authorization: `Basic ${btoa(`${username}:${password}`)}`
+    const fetchFilteredData = async () => {
+        const url = `http://localhost:8000/fetch-${fetchType}`;
+        const queryParams = {
+            start_date: startDate,
+            end_date: endDate,
+            country_code: countryCode
         };
-
-
+    
         try {
-            const response = await axios.get('http://localhost:8000', { headers });
-            const message = response.data.message;
-            setData([{ response: message }]);
+            const response = await axios.get(url, {
+                params: queryParams,
+                auth: {
+                    username: username,
+                    password: password
+                }
+            });
+            const jsonData = JSON.parse(response.data.company_data) as Data[];
+            setData(jsonData)
         } catch (error) {
             console.error('Error:', error);
         }
         
     };
+
+    const fetchInitialData = async () => {
+        const url = `http://localhost:8000`;
+        
+        try {
+            const response = await axios.get(url, {
+                auth: {
+                  username: username,
+                  password: password
+                }
+            });
+            const jsonData = JSON.parse(response.data.company_data) as Data[];
+            setData(jsonData)
+        } catch (error) {
+            console.error('Error:', error);
+        }
+        
+    };
+
+    
+    useEffect(() => {
+        fetchInitialData();
+    }, []); 
+
 
     return (
         <Grid
@@ -60,7 +85,7 @@ const Home: React.FC = () => {
         >
             <Box
                 sx={{
-                    width: '500px',
+                    width: '1000px',
                     height: '800px',
                     borderRadius: '30px',
                     display: 'flex',
@@ -79,20 +104,33 @@ const Home: React.FC = () => {
                 }}
                 >
                 <Grid container direction="column" spacing={2} alignItems="center" padding="20px">
-                    <Typography variant="h5" gutterBottom >
-                    YOUR DATA
-                    </Typography>
 
+                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                        <label style={{ marginRight: '10px' }}>Start Date:</label>
+                        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={{ marginRight: '20px' }} />
+                        <label style={{ marginRight: '10px' }}>End Date:</label>
+                        <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={{ marginRight: '20px' }} />
+                        <label style={{ marginRight: '10px' }}>Country Code:</label>
+                        <input type="text" value={countryCode} onChange={(e) => setCountryCode(e.target.value)} style={{ marginRight: '20px' }} />
+                        <label style={{ marginRight: '10px' }}>Fetch Type:</label>
+                        <select value={fetchType} onChange={(e) => setFetchType(e.target.value)} style={{ marginRight: '20px' }}>
+                            <option value="daily">Daily</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
 
-                    <Button variant="contained" onClick={testFetchData} style={{ marginBottom: '20px' }}>
+                    <Button variant="contained" onClick={fetchFilteredData} style={{ marginBottom: '20px' }}>
                     Fetch data
                     </Button>
-                    
-                    {data.map((item, index) => (
-                        <Typography key={index} variant="body1">{item.response}</Typography>
-                        ))}
 
-                    
+                    <Scrollbar style={{ width: '100%', height: '60vh'}}>
+                        {data.map((item, index) => (
+                            <div key={index}>
+                                <Typography variant="body1">Date: {item.date}, Country Code: {item.country_code}, A: {item.A}, B: {item.B}, C: {item.C}</Typography>
+
+                            </div>
+                        ))}
+                    </Scrollbar>
                 </Grid>
                 </Paper>
             </Box>

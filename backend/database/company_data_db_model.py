@@ -1,8 +1,5 @@
-from sqlalchemy import Column, String, DateTime, JSON
+from sqlalchemy import Column, String, JSON
 from sqlalchemy.ext.declarative import declarative_base
-from datetime import datetime
-from uuid import uuid4
-import pandas as pd
 
 Base = declarative_base()
 
@@ -14,9 +11,11 @@ class CompanyDataDBModel(Base):
 
 
     @classmethod
-    def from_dto(cls, simple_company_data_dto):
+    def from_dto(cls, company_data_dto):
+        daily_data_json = company_data_dto.daily_data.to_json() if company_data_dto.daily_data is not None else None
+        monthly_data_json = company_data_dto.monthly_data.to_json() if company_data_dto.monthly_data is not None else None
         return cls(
-            company_name=simple_company_data_dto.company_name,
-            daily_data=simple_company_data_dto.daily_data.to_json(),
-            monthly_data=simple_company_data_dto.monthly_data.to_json(),
+            company_name=company_data_dto.company_name,
+            daily_data=daily_data_json,
+            monthly_data=monthly_data_json,
         )
